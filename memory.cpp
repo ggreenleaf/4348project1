@@ -7,6 +7,7 @@ Memory::Memory()
 	{
 		memory[i] = 0; 
 	}
+
 }
 
 Memory::~Memory()
@@ -17,18 +18,25 @@ Memory::~Memory()
 
 void Memory::print()
 {
+	for (int i = 0; i < MEMSIZE; i++)
+	{
+		printf("address %i\tdata %i\n",i,memory[i]);
+	}
+}
+/**
+* get the data on a certain memory address
+*@param return the data at this address
+*@return the data at 
+**/
+
+int Memory::read(int address)
+{
+	return memory[address];
+}
+
+void Memory::write(int addresss, int data)
+{
 
 }
 
-void Memory::readfile(std::string filename)
-{
-	std::vector<char> v;
-	if (FILE *fp = fopen(filename, "r"))
-	{
-		char buf[1024];
-		while (size_t len = fread(buf, 1, sizeof(buf), fp))
-			v.insert(v.end(), buf, buf + len);
-		fclose(fp);
-	}
-} 
 
