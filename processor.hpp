@@ -10,32 +10,25 @@ class Processor
 public:
 	Processor();
 	~Processor();
-	enum RegisterLocations {
-		AC, //accumulator
-		SP, //stack pointer
-		IR, //instruction stored here
-		PC, //Program Counter
-		X, //X,Y are local vars for storing operands
-		Y };
 
 	/**
 	* Fetches a single instruction from memory and stores in IR
-	* @param address the address in memory to fetch instruction
-	*
+	* @param the address in memory to fetch instruction
+	*	after fetch PC will be incremented
 	**/
 	void fetch (int address); 
 	
 	/**
-	*
-	* run runs a single instruction then increments PC
-	* @param operand is if a instruction requires an operand
+	* run runs a single instruction
+	* @param operand of instruction
 	**/
 	void run(int operand); 
 	void run();
 private: //The instruction set(functions) for the processor 
-
+	
 private:
-	int registers[5];
+	int AC, SP, IR, X, PC, Y; //registers used by processor
+
 
 };
 

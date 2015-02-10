@@ -28,6 +28,7 @@ int main()
 
 	int readInt; //number sent from processor to memory all message sent are numbers
 	
+	//Memory mem("../sample4.txt");
 	Memory mem;
 	Processor cpu;
 
@@ -44,7 +45,8 @@ int main()
 		close(cpuToMem[WRITE]); 
 		close(memToCpu[READ]);
 		//sample write 			{
-		// write(memToCpu[WRITE],&i, sizeof(i));	
+		// write(memToCpu[WRITE],&i, sizeof(i));
+		mem.print();
 
 	}
 	
