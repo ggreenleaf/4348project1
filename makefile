@@ -1,6 +1,6 @@
 #declaring variables
 CC=g++
-//CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++0x
 
 
 objects = memory.o processor.o main.o

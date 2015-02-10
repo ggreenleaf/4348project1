@@ -30,7 +30,7 @@ Memory::Memory(std::string filename)
 	memory.fill(0);
 	std::fstream file;
 	file.open(filename);
-	int loader = 0;
+	int loader = 0; //memory address where instruction will be stored
 	int data; 
 	while (!file.eof())
 	{
@@ -61,7 +61,9 @@ void Memory::print()
 			iter != memory.end();
 			++iter )
 	{
-		std::cout << "address: " << i << " data: " << *iter << std::endl; 
+		std::cout << "address: 0x" << std::hex << i++ 
+		<< " data: " << std::dec << *iter << std::endl; 
+		
 	}
 }
 /**
