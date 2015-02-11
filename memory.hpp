@@ -16,7 +16,7 @@ public:
 	void	readfile (std::string); //reads program into memory from file
 	int 	read(int addresss);
 	void	write(int address, int data);
-
+	
 
 private:
 	std::array<int,MEMSIZE> memory;

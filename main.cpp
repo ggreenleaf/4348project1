@@ -12,8 +12,9 @@
 #define WRITE 1
 #define MEMSIZE 2000
 #define NUMREGISTERS 6
-#define LOAD 0
-#define STORE 1
+#define FETCH 0 //processor requesting instruction be sent
+#define LOAD 1
+#define STORE 2
 
 
 int cpuToMem [2]; //pipe for communication cpu -> memory
@@ -38,7 +39,6 @@ int main(int argc, char *argv[])
 	pid = fork();
 	if (pid < 0) //error checking fork
 	{
-
 		perror("fork error");
 		exit(1);
 	}
@@ -47,40 +47,26 @@ int main(int argc, char *argv[])
 	{	
 		close(cpuToMem[WRITE]); 
 		close(memToCpu[READ]);
-		//sample write 			{
-		// write(memToCpu[WRITE],&i, sizeof(i));
-		//memory will constantly be reading cpu will send signal to Memory
-		 while (true)
-		 {
-			read(cpuToMem[READ], &readInt, sizeof(readInt));
+		//signal sent by cpu
+		int addr;
+		mem.print();
 
-			switch (readInt)
-			{
-
-						break;
-				default:
-						break;
-			}
-		 
-		 }
-
+		// while (addr != 50)
+		// {	
+		// read(cpuToMem[READ],&addr,sizeof(&addr));
+		// // read(cpuToMem[READ], &addr, sizeof(&addr));
+		// int pc = mem.read(addr);
+		// write(memToCpu[WRITE],&pc, sizeof(pc));
+		// }
 	}
 	
 	else //parent process will represent cpu
 	{
+
 		close(cpuToMem[READ]);
 		close(memToCpu[WRITE]);
-		int d = STORE;
-		int data = 77;
-		// write(cpuToMem[WRITE],&d, sizeof(d));
-		// write(cpuToMem[WRITE],&data, sizeof(data));
-		int i = 0;
-		while (++i < 20)
-		{	
-			int data = rand() % 10;
-			write(cpuToMem[WRITE], &data, sizeof(data));
-		}
-
+		// while(cpu.get_pc() != 1000)
+		// 	cpu.fetch(cpuToMem[WRITE],memToCpu[READ]);
 
 	wait(NULL); //waits for child process to complete
 	}

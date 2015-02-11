@@ -2,7 +2,7 @@
 #define PROCESSOR_HPP
 
 
-
+enum MemorySignals  {FETCH, LOAD, STORE};
 
 
 class Processor
@@ -11,12 +11,8 @@ public:
 	Processor();
 	~Processor();
 
-	/**
-	* Fetches a single instruction from memory and stores in IR
-	* @param the address in memory to fetch instruction
-	*	after fetch PC will be incremented
-	**/
-	void fetch (int address); 
+
+	void fetch (int, int); 
 	
 	/**
 	* run runs a single instruction
@@ -24,6 +20,7 @@ public:
 	**/
 	void run(int operand); 
 	void run();
+	int get_pc();
 private: //The instruction set(functions) for the processor 
 	
 private:

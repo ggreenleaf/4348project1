@@ -9,17 +9,6 @@
 * program file must me formatted correctly with one instruction per line
 **/
 
-int parse_line(std::string line)
-{
-	std::string num;
-	for (int i=0; i < 2; i++)
-	{
-		num += line[i];
-	}
-	return atoi(num.c_str());
-}
-
-
 Memory::Memory()
 {
 	memory.fill(0);
@@ -28,22 +17,36 @@ Memory::Memory()
 Memory::Memory(std::string filename)
 {
 	memory.fill(0);
+	
 	std::fstream file;
-	file.open(filename);
+	file.open(filename); //add error checking on file
 	int loader = 0; //memory address where instruction will be stored
 	int data; 
-	while (!file.eof())
-	{
-		std::string temp;
-		getline(file,temp);
-		if (temp[0] == '\n') //blankline loader
+	std::string::size_type n;
+	std::string::size_type space_indx; 
+	std::string line;	
+	
+	while (!file.eof()) {
+		getline(file,line);
+		
+		if (line.size() == 0 || std::isspace(line[0])) { //ignore blank lines 
 			continue;
-		else if (temp[0] == '.') //move loader
-			continue;
-		else //continue
-			data = parse_line(temp);
-			memory[loader++] = data; //after loading data into memory increase loader index
+		}
+
+		if ((space_indx = line.find(" ") ) != std::string::npos) //found a space in the line 
+			line = line.substr(0,space_indx); //get substring before space
+
+		if ((n = line.find(".")) != std::string::npos ) { //found . move loader
+			int moveLoad = atoi(line.substr(1,line.size()).c_str()); //move period convert to number stoi not in c++0x
+			loader = moveLoad;
+		}
+		else {
+			memory[loader] = atoi(line.c_str());
+			loader++;
+		}
 	}
+
+	file.close();
 }
 
 Memory::~Memory()
@@ -59,11 +62,9 @@ void Memory::print()
 	//c++11 unvailable in linux machine
 	for (std::array<int,MEMSIZE>::iterator iter = memory.begin();
 			iter != memory.end();
-			++iter )
-	{
-		std::cout << "address: 0x" << std::hex << i++ 
-		<< " data: " << std::dec << *iter << std::endl; 
-		
+			++iter ) {
+		std::cout << "address: "<< i++ 
+		<< " data: " << std::dec << *iter << std::endl; 		
 	}
 }
 /**
