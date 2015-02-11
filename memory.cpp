@@ -60,11 +60,8 @@ void Memory::print()
 	int i = 0;
 	//cant use foreach loop 
 	//c++11 unvailable in linux machine
-	for (std::array<int,MEMSIZE>::iterator iter = memory.begin();
-			iter != memory.end();
-			++iter ) {
-		std::cout << "address: "<< i++ 
-		<< " data: " << std::dec << *iter << std::endl; 		
+	for (std::array<int,MEMSIZE>::iterator iter = memory.begin(); iter != memory.end(); ++iter ) {
+		std::cout << "address: "<< i++ << " data: " << *iter << std::endl;
 	}
 }
 /**

@@ -35,3 +35,8 @@ int Processor::get_pc()
 {
 	return PC;
 }
+
+void Processor::get()
+{
+	AC = rand() % 100 + 1;
+}
