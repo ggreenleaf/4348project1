@@ -38,9 +38,13 @@ Processor::~Processor()
 void Processor::fetch()
 {	
 	//send address to memory process
-	write (writeFd, &PC, sizeof(PC)); //send program counter to memory process
-	//read IR from memory process
-	read (readFd,&IR,sizeof(IR));
+	// int sig = 0;
+	// write(writeFd, &sig, sizeof(sig));
+	
+	// write (writeFd, &PC, sizeof(PC)); //send program counter to memory process
+	// //read IR from memory process
+	// read (readFd,&IR,sizeof(IR));
+	IR = send(PC); //send to memory and set IR to return value
 	PC++;
 }
 int Processor::get_ir()
@@ -48,18 +52,45 @@ int Processor::get_ir()
 	return IR;
 }
 
-
-
+/**
+* send data over pipe to request data at memory address addr
+* @param address to read from memory
+* return the value memory sends back over pipe
+**/
+int Processor::send(int addr)
+{
+	int data; //received data from memory
+	int sig = 0;
+	write(writeFd, &sig, sizeof(sig)); //send memory signal to not write data to memory
+	write(writeFd, &addr, sizeof(addr)); //send address to memory process
+	read(readFd, &data, sizeof(data)); //read from memory process into data
+	return data;
+}
+/**
+* send data over pipe to request data at memory address addr
+* @param address to read from memory
+* @param data to write at address
+**/
+void Processor::send_for_store(int addr, int data)
+{
+	int sig = 1;
+	write(writeFd, &sig, sizeof(sig));
+	write(writeFd, &addr, sizeof(addr));
+	write(readFd, &data, sizeof(data));
+}
 
 
 int Processor::get_operand()
 {
 	int op;
-	//send address to memory process
-	write(writeFd, &PC, sizeof(PC)); //send program counter to memory process
-	//read address from memory process
-	read(readFd,&op,sizeof(op));
-	PC++; //after reading increase PC
+	// write(writeFd, &sig, sizeof(sig));
+	// //send address to memory process
+	// write(writeFd, &PC, sizeof(PC)); //send program counter to memory process
+	// //read address from memory process
+	// read(readFd,&op, sizeof(op));
+	// PC++; //after reading increase PC
+	op = send(PC);
+	PC++;
 	return op;
 }
 
@@ -69,7 +100,6 @@ void Processor::run()
 {
 	int op; //if instruction needs operand store here. 
 	
-
 	switch(IR)
 	{
 		case 1:		op = get_operand();
@@ -92,8 +122,7 @@ void Processor::run()
 					load_indxy_addr(op);
 					break;
 		
-		case 6:		op = get_operand();
-					load_sp_x(op);
+		case 6:		load_sp_x();
 					break;
 
 		case 7:		op = get_operand();
@@ -143,6 +172,7 @@ void Processor::run()
 					break;
 		
 		case 21:	
+					op = get_operand();
 					jump_if_eq_addr(op);
 					break;
 		
@@ -189,36 +219,40 @@ void Processor::run()
 =================================================*/
 void Processor::load_value(int val)
 {
-
+	AC = val;
 }
 
 void Processor::load_addr(int addr)
 {
-
+	// int data;
+	// data = send(addr);
+	AC = send(addr);
 }
 
 void Processor::load_indr_addr(int addr)
 {
-
+	int addr2; //address stored at addr
+	addr2 = send(addr);
+	AC = send(addr2);
 }
 
 void Processor::load_indxx_addr(int addr)
 {
-
+	AC = send(addr + X);
 }
 
 void Processor::load_indxy_addr(int addr)
 {
-
+	AC = send(addr + Y);
 }
 
-void Processor::load_sp_x(int x)
+void Processor::load_sp_x()
 {
-
+	AC = send(SP+X);
 }
 void Processor::store_addr(int addr)
 {
-
+	send_for_store(addr, AC);
 }
 
 void Processor::get()
@@ -255,37 +289,36 @@ void Processor::sub_x()
 
 void Processor::sub_y()
 {
-
+	AC -= Y;
 }
-
 
 void Processor::cpy_to_x()
 {
-
+	X = AC;
 }
 
 void Processor::cpy_from_x()
 {
-
+	AC = X;
 }
 
 void Processor::cpy_to_y()
 {
-
+	Y = AC;
 }
 
 void Processor::cpy_from_y()
 {
-
+	AC = Y;
 }
 void Processor::cpy_to_sp()
 {
-
+	SP = AC;
 }
 
 void Processor::cpy_from_sp()
 {
-
+	AC = SP;
 }
 /**
 *

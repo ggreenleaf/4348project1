@@ -20,6 +20,8 @@ public:
 	void 	run();
 	int 	get_ir();
 	int 	get_operand();
+	int 	send(int addr);
+	void	send_for_store(int addr, int data);
 
 private: //The instruction set for the processor 	
 	void	load_value (int val); //load value into AC
@@ -27,7 +29,7 @@ private: //The instruction set for the processor
 	void	load_indr_addr(int addr); //load value from the adddress found in the address into AC
 	void	load_indxx_addr(int addr); //load the value at(addr+x) in the AC
 	void	load_indxy_addr(int addr); //load the value at(addr+y) in the AC
-	void 	load_sp_x(int x); //load form (sp+x) into AC
+	void 	load_sp_x(); //load from (sp+x) into AC
 	void	store_addr(int addr); //store value in teh AC into the address
 	void	get(); //gets a random int[1,100] into AC
 	void	put_port(int mode); //port=1 writes AC as an int to screen if port=2 write ascii

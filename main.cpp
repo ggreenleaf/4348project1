@@ -48,22 +48,27 @@ int main(int argc, char *argv[])
 		close(cpuToMem[WRITE]); 
 		close(memToCpu[READ]);
 		//signal sent by cpu
-		int addr = 0;
-		int data = 0;
-		int isRead = 1; //used for switch case to read or write
-		
+		int sig; //used for switch case to read or write
 		while(true) {	
-			//reading from cpu if need to write or read from memory
-			// read(cpuToMem[READ], &isRead, sizeof(isRead));
-			
-			mem._read();
-
+			//wait for signal from cpu
+			read(cpuToMem[READ], &sig, sizeof(sig));
+			switch (sig)
+			{
+				case 0:	mem._read();
+						break;
+				case 1:
+						mem._write();
+						break;
+				default:
+						break;
+			}
 			
 		}
 
 
 	}
 	else { //parent process will represent cpu
+		
 		close(cpuToMem[READ]);
 		close(memToCpu[WRITE]);
 		

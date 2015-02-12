@@ -108,7 +108,6 @@ void Memory::_write(int addr, int data)
 * private write will handle communication between processes
 * call private _write to write data to memory
 **/
-
 void Memory::_write()
 {
 	int addr, data;

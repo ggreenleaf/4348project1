@@ -16,6 +16,7 @@ public:
 	//underscores for easier dif from read/write unix functions
 	void	_read(); 
 	void	_write();
+
 private:
 	int 	_read(int); //retrun val at address in memory
 	void	_write(int, int);
