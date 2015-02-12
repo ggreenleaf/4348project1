@@ -2,17 +2,16 @@
 #define PROCESSOR_HPP
 
 
-enum MemorySignals  {FETCH, LOAD, STORE};
-
 
 class Processor
 {
 public:
 	Processor();
+	Processor(int, int);
 	~Processor();
 
 
-	void fetch (int, int); 
+	void fetch (); 
 	
 	/**
 	* run runs a single instruction
@@ -21,11 +20,13 @@ public:
 	void 	run(int operand); 
 	void 	run();
 	int 	get_pc();
+	int 	get_ir();
+	int 	get_operand();
 private: //The instruction set(functions) for the processor 
 	
 	void	load_value (int val); //load value into AC
 	void	load_addr (int addr); //load value at address into AC
-	void	load_indr_addr(); //load value from the adddress found in the address into AC
+	void	load_indr_addr(int addr); //load value from the adddress found in the address into AC
 	void	load_indxx_addr(int addr); //load the value at(addr+x) in the AC
 	void	load_indxy_addr(int addr); //load the value at(addr+y) in the AC
 	void 	load_sp_x(int x); //load form (sp+x) into AC
@@ -59,7 +60,7 @@ private: //The instruction set(functions) for the processor
 
 private:
 	int AC, SP, IR, X, PC, Y; //registers used by processor
-
+	int writeFd, readFd; //file discriptors for writing/reading to memory process
 
 };
 

@@ -8,6 +8,7 @@
 #include "memory.hpp"
 #include "processor.hpp"
 #include <time.h>
+#include <signal.h>
 #define READ 0
 #define WRITE 1
 #define MEMSIZE 2000
@@ -24,53 +25,69 @@ int memToCpu [2]; //pipe for communication memory -> cpu
 int main(int argc, char *argv[]) 
 {
 	pid_t pid;
-	std::string filename = argv[1];
+	std::string filename = argv[1]; //program file name
+	
 	//need two pipes because they are not able to read/write from both ends
 	pipe(cpuToMem); //sending from processor(parent) -> memory(child)
 	pipe(memToCpu); //sending from memory(child) -> processor(parent)
 	
 
-	int readInt; //number sent from processor to memory all message sent are numbers
-	srand(time(NULL));
-	//Memory mem("../sample4.txt");
-	Memory mem(filename);
-	Processor cpu;
+	srand(time(NULL)); //set seed for random in cpu.get()
+	
+	Memory mem(filename, memToCpu[WRITE], cpuToMem[READ]);
+	Processor cpu(cpuToMem[WRITE], memToCpu[READ]);
+	
 
 	pid = fork();
-	if (pid < 0) //error checking fork
-	{
+	if (pid < 0) { //error checking fork 
 		perror("fork error");
 		exit(1);
 	}
 	
-	else if (pid == 0) //child process will represent memory
-	{	
+	else if (pid == 0) { //child process will represent memory
 		close(cpuToMem[WRITE]); 
 		close(memToCpu[READ]);
 		//signal sent by cpu
-		int addr;
-		mem.print();
+		int addr = 0;
+		int data = 0;
+		int isRead = 1; //used for switch case to read or write
+		
+		while(true) {	
+			//reading from cpu if need to write or read from memory
+			// read(cpuToMem[READ], &isRead, sizeof(isRead));
+			read(cpuToMem[READ], &addr, sizeof(&addr)); //read addr from cpu process
+			
+			if (isRead) {
+				int data = mem.read(addr); //get address from memory
+				write(memToCpu[WRITE],&data, sizeof(data)); //send accross pipe to cpu
+			}
+			else {
+				read(cpuToMem[READ], &data, sizeof(data) );
+				mem.write(addr,data);
+			}
 
-		// while (addr != 50)
-		// {	
-		// read(cpuToMem[READ],&addr,sizeof(&addr));
-		// // read(cpuToMem[READ], &addr, sizeof(&addr));
-		// int pc = mem.read(addr);
-		// write(memToCpu[WRITE],&pc, sizeof(pc));
-		// }
+			
+		}
+
+
 	}
-	
-	else //parent process will represent cpu
-	{
-
+	else { //parent process will represent cpu
 		close(cpuToMem[READ]);
 		close(memToCpu[WRITE]);
-		// while(cpu.get_pc() != 1000)
-		// 	cpu.fetch(cpuToMem[WRITE],memToCpu[READ]);
+		
+		while(true) {
+			
+			cpu.fetch();
+			cpu.run();
+			
+			if (cpu.get_ir() == 50) {
+				kill(pid, SIGKILL); //kill memory process
+				break;
+			}
+		}	
 
 	wait(NULL); //waits for child process to complete
 	}
-
 
 
 return 0;

@@ -3,23 +3,31 @@
 #include <fstream>
 #include <iostream>
 
-/**
-*
-* parses a line in  program file and returns the number
-* program file must me formatted correctly with one instruction per line
-**/
 
 Memory::Memory()
 {
 	memory.fill(0);
 
 }
-Memory::Memory(std::string filename)
-{
+/**
+*
+* contructor for memory will load a program file(.txt) into memory
+* @param filename the filename of the program to load into memory
+* @param wfd file discriptor for writing to cpu process
+* @param rfd file discriptor for reading to cpu process
+**/
+
+Memory::Memory(std::string filename, int wfd, int rfd)
+{	
+
+	writeFd = wfd;
+	readFd = rfd;
+	
 	memory.fill(0);
 	
 	std::fstream file;
 	file.open(filename); //add error checking on file
+	
 	int loader = 0; //memory address where instruction will be stored
 	int data; 
 	std::string::size_type n;

@@ -11,7 +11,7 @@ class Memory
 public:
 			Memory();
 			~Memory();
-			Memory(std::string filename);
+			Memory(std::string, int, int);
 	void	print(); //print the contents of the memory
 	void	readfile (std::string); //reads program into memory from file
 	int 	read(int addresss);
@@ -20,6 +20,7 @@ public:
 
 private:
 	std::array<int,MEMSIZE> memory;
+	int writeFd, readFd; //file discriptors for read/writing to processor 
 
 };
 
