@@ -6,8 +6,8 @@ CXXFLAGS = -std=c++0x
 objects = memory.o processor.o main.o
 sources = memory.cpp main.cpp processor.cpp
 
-project1: $(objects)
-	g++ $(CXXFLAGS) -o project1 $(objects)
+project1.out: $(objects)
+	g++ $(CXXFLAGS) -o project1.out $(objects)
 
 memory.o: memory.hpp
 processor.o: processor.hpp

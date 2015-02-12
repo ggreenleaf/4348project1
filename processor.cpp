@@ -38,9 +38,9 @@ Processor::~Processor()
 void Processor::fetch()
 {	
 	//send address to memory process
-	write(writeFd, &PC, sizeof(PC)); //send program counter to memory process
+	write (writeFd, &PC, sizeof(PC)); //send program counter to memory process
 	//read IR from memory process
-	read(readFd,&IR,sizeof(IR));
+	read (readFd,&IR,sizeof(IR));
 	PC++;
 }
 int Processor::get_ir()
@@ -48,10 +48,7 @@ int Processor::get_ir()
 	return IR;
 }
 
-int Processor::get_pc()
-{
-	return PC;
-}
+
 
 
 
@@ -60,9 +57,9 @@ int Processor::get_operand()
 	int op;
 	//send address to memory process
 	write(writeFd, &PC, sizeof(PC)); //send program counter to memory process
-	//read IR from memory process
+	//read address from memory process
 	read(readFd,&op,sizeof(op));
-	PC++;
+	PC++; //after reading increase PC
 	return op;
 }
 
@@ -253,7 +250,7 @@ void Processor::add_y()
 
 void Processor::sub_x()
 {
-
+	AC -= X;
 }
 
 void Processor::sub_y()
@@ -290,18 +287,34 @@ void Processor::cpy_from_sp()
 {
 
 }
-
+/**
+*
+* will jump to an address
+* @param address to jump to
+**/
 void Processor::jump_addr(int addr)
 {
-
+	PC = addr;
 }
+/**
+* if data at AC == 0 jump to a address
+* will set PC to addr	
+* @param addr address to jump to 
+**/
 void Processor::jump_if_eq_addr(int addr)
 {
-
+	if (!AC) 
+		PC = addr; 
 }
+/**
+* if data at AC != 0 jump to a address
+* will set PC to addr	
+* @param addr address to jump to
+**/
 void Processor::jump_if_neq_addr(int addr)
 {
-
+	if (AC)
+		PC = addr;
 }
 void Processor::call_addr(int addr)
 {
@@ -311,13 +324,24 @@ void Processor::ret()
 {
 
 }
+/**
+*
+* Increment X by 1
+*
+**/
 void Processor::inc_x()
 {
-
+	X++;
 }
+
+/**
+*
+* Decrement X by 1
+*
+**/
 void Processor::dec_x()
 {
-
+	X--;
 }
 void Processor::push()
 {
@@ -329,7 +353,7 @@ void Processor::pop()
 }
 void Processor::mode()
 {
-	
+
 }
 void Processor::i_ret()
 {

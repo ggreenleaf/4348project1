@@ -2,7 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-
+#include <unistd.h>
 
 Memory::Memory()
 {
@@ -13,8 +13,8 @@ Memory::Memory()
 *
 * contructor for memory will load a program file(.txt) into memory
 * @param filename the filename of the program to load into memory
-* @param wfd file discriptor for writing to cpu process
-* @param rfd file discriptor for reading to cpu process
+* @param wfd file descriptor for writing to cpu process
+* @param rfd file descriptor for reading to cpu process
 **/
 
 Memory::Memory(std::string filename, int wfd, int rfd)
@@ -45,11 +45,11 @@ Memory::Memory(std::string filename, int wfd, int rfd)
 			line = line.substr(0,space_indx); //get substring before space
 
 		if ((n = line.find(".")) != std::string::npos ) { //found . move loader
-			int moveLoad = atoi(line.substr(1,line.size()).c_str()); //move period convert to number stoi not in c++0x
-			loader = moveLoad;
+			int moveLoader = std::stoi(line.substr(1,line.size())); //move period convert to number stoi not in c++0x
+			loader = moveLoader;
 		}
 		else {
-			memory[loader] = atoi(line.c_str());
+			memory[loader] = std::stoi(line.c_str());
 			loader++;
 		}
 	}
@@ -68,24 +68,55 @@ void Memory::print()
 	int i = 0;
 	//cant use foreach loop 
 	//c++11 unvailable in linux machine
-	for (std::array<int,MEMSIZE>::iterator iter = memory.begin(); iter != memory.end(); ++iter ) {
-		std::cout << "address: "<< i++ << " data: " << *iter << std::endl;
+	for (int data : memory) {
+		std::cout << "address: "<< i++ << " data: " << data << std::endl;
 	}
+}
+
+void Memory::_read()
+{
+	int addr;
+	int data;
+	//read address from cpu process
+	read(readFd,&addr, sizeof(addr));
+	data = _read(addr); //get data at addr
+	//write data back to cpu process
+	write(writeFd,&data,sizeof(addr));
 }
 /**
 * get the data on a certain memory address
 *@param return the data at this address
 *@return the data at 
 **/
-
-int Memory::read(int address)
+int Memory::_read(int addr)
 {
-	return memory[address];
+	return memory[addr];
 }
 
-void Memory::write(int addresss, int data)
+/**
+* private write 
+* write data to memory address
+* @param addr address to write to
+* @param data data that is to be written
+**/
+void Memory::_write(int addr, int data)
 {
+	memory[addr] = data;
+}
+/**
+*
+* private write will handle communication between processes
+* call private _write to write data to memory
+**/
 
+void Memory::_write()
+{
+	int addr, data;
+	//read addres form cpu process
+	read(readFd,&addr, sizeof(addr));
+	//read data to write to addr
+	read(readFd,&data,sizeof(data));
+	_write(addr,data);
 }
 
 

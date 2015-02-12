@@ -17,13 +17,11 @@ public:
 	* run runs a single instruction
 	* @param operand of instruction
 	**/
-	void 	run(int operand); 
 	void 	run();
-	int 	get_pc();
 	int 	get_ir();
 	int 	get_operand();
-private: //The instruction set(functions) for the processor 
-	
+
+private: //The instruction set for the processor 	
 	void	load_value (int val); //load value into AC
 	void	load_addr (int addr); //load value at address into AC
 	void	load_indr_addr(int addr); //load value from the adddress found in the address into AC

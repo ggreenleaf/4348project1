@@ -13,10 +13,12 @@ public:
 			~Memory();
 			Memory(std::string, int, int);
 	void	print(); //print the contents of the memory
-	void	readfile (std::string); //reads program into memory from file
-	int 	read(int addresss);
-	void	write(int address, int data);
-	
+	//underscores for easier dif from read/write unix functions
+	void	_read(); 
+	void	_write();
+private:
+	int 	_read(int); //retrun val at address in memory
+	void	_write(int, int);
 
 private:
 	std::array<int,MEMSIZE> memory;
