@@ -20,7 +20,10 @@
 
 int cpuToMem [2]; //pipe for communication cpu -> memory
 int memToCpu [2]; //pipe for communication memory -> cpu
-
+void print_registers(Processor& cpu)
+{
+	cpu.print_registers();
+}
 
 int main(int argc, char *argv[]) 
 {
@@ -76,7 +79,7 @@ int main(int argc, char *argv[])
 			
 			cpu.fetch();
 			cpu.run();
-			
+			// print_registers(cpu)
 
 			if (cpu.get_ir() == 50) {
 				kill(pid, SIGKILL); 

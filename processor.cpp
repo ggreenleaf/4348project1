@@ -6,7 +6,7 @@
 
 Processor::Processor()
 {
-	AC = 0, PC = 0, IR = 0 ,X = 0, Y = 0, SP = 0;
+	AC = 0, PC = 0, IR = 0 ,X = 0, Y = 0, SP = 0 ;
 
 }
 
@@ -15,12 +15,15 @@ Processor::Processor()
 * constructor for Processor
 * @param wfd file discriptor for writing to memory process
 * @param rfd file discriptor for reading from memory process
+* @param size of the user memory will be the start of user stack push down
+* @param size of the system memory start of system stack
 **/
 
 Processor::Processor(int wfd, int rfd): Processor()
 {
 	writeFd = wfd;
 	readFd = rfd;
+	SP = 1000;
 }
 
 Processor::~Processor()
@@ -31,20 +34,20 @@ Processor::~Processor()
 /**
 * Fetches a single instruction from memory and stores in IR
 *	Will fetch from memory at address PC
-*	@param fd file discriptorr for sending signal
+*	@param fd file discriptorr for read_from_memorying signal
 *	@param fd2 file discriptor	for reading from signal
 *	after fetch PC will be incremented
 **/
 void Processor::fetch()
 {	
-	//send address to memory process
+	//read_from_memory address to memory process
 	// int sig = 0;
 	// write(writeFd, &sig, sizeof(sig));
 	
-	// write (writeFd, &PC, sizeof(PC)); //send program counter to memory process
+	// write (writeFd, &PC, sizeof(PC)); //read_from_memory program counter to memory process
 	// //read IR from memory process
 	// read (readFd,&IR,sizeof(IR));
-	IR = send(PC); //send to memory and set IR to return value
+	IR = read_from_memory(PC); //read_from_memory to memory and set IR to return value
 	PC++;
 }
 int Processor::get_ir()
@@ -53,30 +56,30 @@ int Processor::get_ir()
 }
 
 /**
-* send data over pipe to request data at memory address addr
+* read_from_memory data over pipe to request data at memory address addr
 * @param address to read from memory
-* return the value memory sends back over pipe
+* return the value memory read_from_memorys back over pipe
 **/
-int Processor::send(int addr)
+int Processor::read_from_memory(int addr)
 {
 	int data; //received data from memory
 	int sig = 0;
-	write(writeFd, &sig, sizeof(sig)); //send memory signal to not write data to memory
-	write(writeFd, &addr, sizeof(addr)); //send address to memory process
+	write(writeFd, &sig, sizeof(sig)); //read_from_memory memory signal to not write data to memory
+	write(writeFd, &addr, sizeof(addr)); //read_from_memory address to memory process
 	read(readFd, &data, sizeof(data)); //read from memory process into data
 	return data;
 }
 /**
-* send data over pipe to request data at memory address addr
+* read_from_memory data over pipe to request data at memory address addr
 * @param address to read from memory
 * @param data to write at address
 **/
-void Processor::send_for_store(int addr, int data)
+void Processor::write_to_memory(int addr, int data)
 {
 	int sig = 1;
-	write(writeFd, &sig, sizeof(sig));
+	write(writeFd, &sig, sizeof(sig));	
 	write(writeFd, &addr, sizeof(addr));
-	write(readFd, &data, sizeof(data));
+	write(writeFd, &data, sizeof(data));
 }
 
 
@@ -84,22 +87,27 @@ int Processor::get_operand()
 {
 	int op;
 	// write(writeFd, &sig, sizeof(sig));
-	// //send address to memory process
-	// write(writeFd, &PC, sizeof(PC)); //send program counter to memory process
+	// //read_from_memory address to memory process
+	// write(writeFd, &PC, sizeof(PC)); //read_from_memory program counter to memory process
 	// //read address from memory process
 	// read(readFd,&op, sizeof(op));
 	// PC++; //after reading increase PC
-	op = send(PC);
+	op = read_from_memory(PC);
 	PC++;
 	return op;
 }
+//debugging purposes
+void Processor::print_registers()
+{
+	printf("AC: %d IR: %d, PC: %d SP: %d X: %d Y: %d\n",AC,IR,PC,SP,X,Y);
 
+	printf("value at SP: %d\n", read_from_memory(SP)); 
+}
 
 
 void Processor::run()
 {
 	int op; //if instruction needs operand store here. 
-	
 	switch(IR)
 	{
 		case 1:		op = get_operand();
@@ -136,8 +144,7 @@ void Processor::run()
 					put_port(op);
 					break;
 		
-		case 10:	op = get_operand();
-					add_x();
+		case 10:	add_x();
 					break;
 		case 11:	
 					add_y();
@@ -211,6 +218,7 @@ void Processor::run()
 		default:
 					std::cout << "invalid instruction\n";
 	}
+
 }
 
 
@@ -225,34 +233,35 @@ void Processor::load_value(int val)
 void Processor::load_addr(int addr)
 {
 	// int data;
-	// data = send(addr);
-	AC = send(addr);
+	// data = read_from_memory(addr);
+	AC = read_from_memory(addr);
 }
 
 void Processor::load_indr_addr(int addr)
 {
 	int addr2; //address stored at addr
-	addr2 = send(addr);
-	AC = send(addr2);
+	addr2 = read_from_memory(addr);
+	AC = read_from_memory(addr2);
 }
 
 void Processor::load_indxx_addr(int addr)
 {
-	AC = send(addr + X);
+	AC = read_from_memory(addr + X);
 }
 
 void Processor::load_indxy_addr(int addr)
 {
-	AC = send(addr + Y);
+	AC = read_from_memory(addr + Y);
 }
 
 void Processor::load_sp_x()
 {
-	AC = send(SP+X);
+	AC = read_from_memory(SP + X);
 }
+
 void Processor::store_addr(int addr)
 {
-	send_for_store(addr, AC);
+	write_to_memory(addr, AC);
 }
 
 void Processor::get()
@@ -266,10 +275,10 @@ void Processor::get()
 **/
 void Processor::put_port(int mode)
 {
-	if (mode - 1)
-		std::cout << (char)AC;
-	else
-		std::cout << (AC);
+	 if (mode - 1)
+	 	std::cout << (char)AC;
+	 else
+		std::cout << AC;
 }
 
 void Processor::add_x() 
@@ -336,7 +345,7 @@ void Processor::jump_addr(int addr)
 **/
 void Processor::jump_if_eq_addr(int addr)
 {
-	if (!AC) 
+	if (!AC)
 		PC = addr; 
 }
 /**
@@ -346,31 +355,29 @@ void Processor::jump_if_eq_addr(int addr)
 **/
 void Processor::jump_if_neq_addr(int addr)
 {
-	if (AC)
+	if (AC) 
 		PC = addr;
 }
 void Processor::call_addr(int addr)
 {
-
+	write_to_memory(--SP, PC);
+	jump_addr(addr);
 }
 void Processor::ret()
 {
-
+	int addr;
+	addr = read_from_memory(SP++);
+	jump_addr(addr);
 }
 /**
-*
 * Increment X by 1
-*
 **/
 void Processor::inc_x()
 {
 	X++;
 }
-
 /**
-*
 * Decrement X by 1
-*
 **/
 void Processor::dec_x()
 {
@@ -378,11 +385,11 @@ void Processor::dec_x()
 }
 void Processor::push()
 {
-
+	write_to_memory(--SP, AC); //read_from_memory AC on to Stack
 }
 void Processor::pop()
 {
-
+	AC = read_from_memory(SP++);
 }
 void Processor::mode()
 {

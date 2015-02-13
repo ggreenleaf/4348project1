@@ -80,6 +80,7 @@ void Memory::_read()
 	//read address from cpu process
 	read(readFd,&addr, sizeof(addr));
 	data = _read(addr); //get data at addr
+
 	//write data back to cpu process
 	write(writeFd,&data,sizeof(addr));
 }

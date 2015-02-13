@@ -1,6 +1,6 @@
 #declaring variables
 CC=g++
-CXXFLAGS = -std=c++0x
+CXXFLAGS = -std=c++0x -g
 
 
 objects = memory.o processor.o main.o
@@ -16,4 +16,4 @@ main.o: memory.hpp processor.hpp
 $(objects): $(sources)
 		g++ $(CXXFLAGS) -c $(sources)
 clean:
-	rm $(objects) project1
+	rm $(objects) project1.out
