@@ -23,6 +23,7 @@ private:
 
 private:
 	std::array<int,MEMSIZE> memory;
+	
 	int writeFd, readFd; //file discriptors for read/writing to processor 
 
 };

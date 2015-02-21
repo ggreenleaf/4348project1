@@ -4,25 +4,15 @@
 #include <iostream>
 #include <unistd.h>
 
-Memory::Memory()
-{
-	memory.fill(0);
 
-}
 /**
-*
 * contructor for memory will load a program file(.txt) into memory
 * @param filename the filename of the program to load into memory
 * @param wfd file descriptor for writing to cpu process
 * @param rfd file descriptor for reading to cpu process
 **/
-
-Memory::Memory(std::string filename, int wfd, int rfd)
+Memory::Memory(std::string filename, int wfd, int rfd): writeFd(wfd), readFd(rfd)
 {	
-
-	writeFd = wfd;
-	readFd = rfd;
-	
 	memory.fill(0);
 	
 	std::fstream file;
@@ -49,18 +39,14 @@ Memory::Memory(std::string filename, int wfd, int rfd)
 			loader = moveLoader;
 		}
 		else {
-			memory[loader] = std::stoi(line.c_str());
+			memory[loader] = std::stoi(line);
 			loader++;
 		}
 	}
-
 	file.close();
 }
 
-Memory::~Memory()
-{
-
-}
+Memory::~Memory() {}
 
 
 void Memory::print()
@@ -79,8 +65,8 @@ void Memory::_read()
 	int data;
 	//read address from cpu process
 	read(readFd,&addr, sizeof(addr));
+	
 	data = _read(addr); //get data at addr
-
 	//write data back to cpu process
 	write(writeFd,&data,sizeof(addr));
 }
@@ -95,27 +81,26 @@ int Memory::_read(int addr)
 }
 
 /**
-* private write 
 * write data to memory address
-* @param addr address to write to
-* @param data data that is to be written
+* @param address to write to
+* @param data that is to be written
 **/
 void Memory::_write(int addr, int data)
 {
 	memory[addr] = data;
 }
 /**
-*
-* private write will handle communication between processes
-* call private _write to write data to memory
+* public _write will handle communication between processes
+* and then call _write with the addr and data to save to memory
 **/
 void Memory::_write()
 {
 	int addr, data;
-	//read addres form cpu process
-	read(readFd,&addr, sizeof(addr));
+	//read address form cpu process
+	read(readFd, &addr, sizeof(addr));
 	//read data to write to addr
-	read(readFd,&data,sizeof(data));
+	read(readFd, &data, sizeof(data));
+	
 	_write(addr,data);
 }
 

@@ -4,12 +4,15 @@
 #include <stdio.h>
 #include <unistd.h>
 
-Processor::Processor()
-{
-	AC = 0, PC = 0, IR = 0 ,X = 0, Y = 0, SP = 0 ;
+#define INTERRUPT_HANDLER 1500 //location of program interrupt handler 
+#define TIMER_HANDLER 1000 //location of timer interrupt handler
+#define SYSTEM_MEMORY 1000 //can't read from this address or greater unless in system mode
+#define SYSTEM_STACK 2000 //System stack pointer after saving PC, SP
+#define INTERRUPT_INST 29 //instruction code for interrupt
+#define TIMER_INTERRUPT 0
+#define PROGRAM_INTERRUPT 1
 
-}
-
+Processor::Processor() {}
 /**
 *
 * constructor for Processor
@@ -17,39 +20,23 @@ Processor::Processor()
 * @param rfd file discriptor for reading from memory process
 * @param size of the user memory will be the start of user stack push down
 * @param size of the system memory start of system stack
+* @param number of instructions to run before interrupt is exec. 
 **/
-
-Processor::Processor(int wfd, int rfd): Processor()
-{
-	writeFd = wfd;
-	readFd = rfd;
-	SP = 1000;
-}
-
-Processor::~Processor()
-{
-
-}
-
+Processor::~Processor() {};
+Processor::Processor(int wfd, int rfd , int count):
+	AC(0), PC(0), IR(0), X(0),Y(0), SP(SYSTEM_MEMORY),
+	writeFd(wfd), readFd(rfd),
+	instructionsPerInterrupt(count), instructionCount(0),
+	isSystemMode(false), handlingInterrupt(false) {}
 /**
 * Fetches a single instruction from memory and stores in IR
 *	Will fetch from memory at address PC
-*	@param fd file discriptorr for read_from_memorying signal
-*	@param fd2 file discriptor	for reading from signal
-*	after fetch PC will be incremented
 **/
 void Processor::fetch()
 {	
-	//read_from_memory address to memory process
-	// int sig = 0;
-	// write(writeFd, &sig, sizeof(sig));
-	
-	// write (writeFd, &PC, sizeof(PC)); //read_from_memory program counter to memory process
-	// //read IR from memory process
-	// read (readFd,&IR,sizeof(IR));
-	IR = read_from_memory(PC); //read_from_memory to memory and set IR to return value
-	PC++;
+	IR = read_from_memory(PC++); 
 }
+
 int Processor::get_ir()
 {
 	return IR;
@@ -62,11 +49,17 @@ int Processor::get_ir()
 **/
 int Processor::read_from_memory(int addr)
 {
-	int data; //received data from memory
+	int data = 0; //received data from memory
 	int sig = 0;
-	write(writeFd, &sig, sizeof(sig)); //read_from_memory memory signal to not write data to memory
-	write(writeFd, &addr, sizeof(addr)); //read_from_memory address to memory process
-	read(readFd, &data, sizeof(data)); //read from memory process into data
+	
+	if (addr >= SYSTEM_MEMORY && !isSystemMode) {
+		std::cout << "Error can't read system memory address (" << addr << ")\n";
+	}
+	else {
+		write(writeFd, &sig, sizeof(sig)); //send memory signal to not write data to memory
+		write(writeFd, &addr, sizeof(addr)); //send address to memory process
+		read(readFd, &data, sizeof(data)); //read from memory process into data
+	}
 	return data;
 }
 /**
@@ -77,77 +70,81 @@ int Processor::read_from_memory(int addr)
 void Processor::write_to_memory(int addr, int data)
 {
 	int sig = 1;
-	write(writeFd, &sig, sizeof(sig));	
-	write(writeFd, &addr, sizeof(addr));
-	write(writeFd, &data, sizeof(data));
+	if (addr >= SYSTEM_MEMORY && !isSystemMode) {
+		std::cout << "Error can't write to system memory address (" << addr << ")\n";
+	}
+	else {
+		write(writeFd, &sig, sizeof(sig));	
+		write(writeFd, &addr, sizeof(addr));
+		write(writeFd, &data, sizeof(data));
+	}
 }
 
 
-int Processor::get_operand()
+int Processor::fetch_operand()
 {
 	int op;
-	// write(writeFd, &sig, sizeof(sig));
-	// //read_from_memory address to memory process
-	// write(writeFd, &PC, sizeof(PC)); //read_from_memory program counter to memory process
-	// //read address from memory process
-	// read(readFd,&op, sizeof(op));
-	// PC++; //after reading increase PC
-	op = read_from_memory(PC);
-	PC++;
+	op = read_from_memory(PC++);
 	return op;
 }
+
 //debugging purposes
 void Processor::print_registers()
 {
-	printf("AC: %d IR: %d, PC: %d SP: %d X: %d Y: %d\n",AC,IR,PC,SP,X,Y);
-
-	printf("value at SP: %d\n", read_from_memory(SP)); 
+	printf("int Count: %d AC: %d IR: %d, PC: %d SP: %d X: %d Y: %d\n",instructionCount, AC,IR,PC,SP,X,Y);
 }
 
 
 void Processor::run()
 {
 	int op; //if instruction needs operand store here. 
+	bool interruptHandler = PROGRAM_INTERRUPT;
+	if (instructionCount && instructionCount % instructionsPerInterrupt == 0 && instructionsPerInterrupt != -1) {
+		std::cout << "handle interrupt!!!\n";
+		interruptHandler = TIMER_INTERRUPT;
+		IR = 29; //cause interrupt instruction
+	}
+
 	switch(IR)
 	{
-		case 1:		op = get_operand();
+		case 1:		op = fetch_operand();
 					load_value(op);
 					break;
 					
-		case 2:		op = get_operand();
+		case 2:		op = fetch_operand();
 					load_addr(op);
 					break;
 		
-		case 3:		op = get_operand();
+		case 3:		op = fetch_operand();
 					load_indr_addr(op);
 					break;
 		
-		case 4:		op = get_operand();
+		case 4:		op = fetch_operand();
 					load_indxx_addr(op);
 					break;
 		
-		case 5:		op = get_operand();
+		case 5:		op = fetch_operand();
 					load_indxy_addr(op);
 					break;
 		
 		case 6:		load_sp_x();
 					break;
 
-		case 7:		op = get_operand();
+		case 7:		op = fetch_operand();
 					store_addr(op);
 					break;
 
 		case 8:		get();
 					break;
 
-		case 9:		op = get_operand();
+		case 9:		op = fetch_operand();
 					put_port(op);
 					break;
 		
 		case 10:	add_x();
 					break;
-		case 11:	
-					add_y();
+		
+		case 11:	add_y();
 					break;
 		
 		case 12:	sub_x();
@@ -174,20 +171,19 @@ void Processor::run()
 		case 19:	cpy_from_sp();
 					break;
 		
-		case 20:	op = get_operand();
+		case 20:	op = fetch_operand();
 					jump_addr(op);
 					break;
 		
-		case 21:	
-					op = get_operand();
+		case 21:	op = fetch_operand();
 					jump_if_eq_addr(op);
 					break;
 		
-		case 22:	op = get_operand();
+		case 22:	op = fetch_operand();
 					jump_if_neq_addr(op);
 					break;
 		
-		case 23:	op = get_operand();
+		case 23:	op = fetch_operand();
 					call_addr(op);
 					break;
 		
@@ -206,21 +202,23 @@ void Processor::run()
 		case 28:	pop();
 					break;
 		
-		case 29:	mode();
+		case 29:	interrupt(interruptHandler);
 					break;
 		
-		case 30:	i_ret();
+		case 30:	interrupt_return();
 					break;
 
 		case 50:	end();
 					break;
 
-		default:
-					std::cout << "invalid instruction\n";
+		default:	
+					std::cout << "invalid instruction: " << IR << "\n";
 	}
 
-}
+	instructionCount++;
 
+	
+}
 
 /*=================================================
 =            Instruction Set Functions            =
@@ -231,10 +229,10 @@ void Processor::load_value(int val)
 }
 
 void Processor::load_addr(int addr)
-{
-	// int data;
-	// data = read_from_memory(addr);
+{	
+
 	AC = read_from_memory(addr);
+
 }
 
 void Processor::load_indr_addr(int addr)
@@ -324,7 +322,6 @@ void Processor::cpy_to_sp()
 {
 	SP = AC;
 }
-
 void Processor::cpy_from_sp()
 {
 	AC = SP;
@@ -340,7 +337,7 @@ void Processor::jump_addr(int addr)
 }
 /**
 * if data at AC == 0 jump to a address
-* will set PC to addr	
+* by setting PC to addr
 * @param addr address to jump to 
 **/
 void Processor::jump_if_eq_addr(int addr)
@@ -385,21 +382,73 @@ void Processor::dec_x()
 }
 void Processor::push()
 {
-	write_to_memory(--SP, AC); //read_from_memory AC on to Stack
+	write_to_memory(--SP, AC); //write AC on to Stack
 }
 void Processor::pop()
 {
 	AC = read_from_memory(SP++);
 }
-void Processor::mode()
-{
+/**
+*
+* interrupt handler will handle saving registers and moving PC
+* to correct hanlder based on interruptHandler
+*
+**/
 
-}
-void Processor::i_ret()
+void Processor::interrupt(int handler)
 {
-
+	isSystemMode = true; 
+	handlingInterrupt = true; //stop nested interrupts (possibly redundant) 
+	save_registers();	
+	
+	switch(handler)
+	{
+		case TIMER_INTERRUPT:
+								PC = TIMER_HANDLER;
+								break;
+		case PROGRAM_INTERRUPT:
+								PC = INTERRUPT_HANDLER;
+								break;
+		default:
+								std::cout << "no valid interrupt handler\n";
+								break;
+	}
 }
+
+void Processor::interrupt_return()
+{
+	restore_registers();
+	std::cout << "PC after restore: " << PC << "\n";
+	isSystemMode = false;
+	handlingInterrupt = false;
+}
+
 void Processor::end()
 {
+	int sig = 2; //signal memory process to exit while loop
+	write(writeFd, &sig, sizeof(sig));
+
+}
+/**
+* save current state of registers to memory's system stack (all of them? or just SP, PC)
+* and set SP to System Stack
+**/
+void Processor::save_registers()
+{
+	int tempSP = SP;
+	SP = SYSTEM_STACK;
+	write_to_memory(--SP, tempSP); //save orignal SP at 1999
+	write_to_memory(--SP, PC); //save PC at 1998
+}
+/**
+* restore the registors from that last interrupt
+**/
+void Processor::restore_registers()
+{
+	int sig = 3;
+	write(writeFd,&sig, sizeof(sig)); // on restore print memory
+	int tempSP = SYSTEM_STACK;
+	SP = read_from_memory(--tempSP); //SP saved at [1999] before interrupt 
+	PC = read_from_memory(--tempSP); //PC saved at [1998] before interrupt
 
 }

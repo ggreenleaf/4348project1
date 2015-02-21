@@ -1,29 +1,35 @@
 #ifndef PROCESSOR_HPP
 #define PROCESSOR_HPP
 
+#define TIMER_INTERRUPT 0
+#define PROGRAM_INTERRUPT 1
 
 
 class Processor
 {
 public:
 	Processor();
-	Processor(int, int);
+	Processor(int, int, int);
 	~Processor();
 
-
-	void fetch (); 
-	
-	/**
-	* run runs a single instruction
-	* @param operand of instruction
-	**/
+	void 	fetch (); 
 	void 	run();
 	int 	get_ir();
-	int 	get_operand();
+	int 	fetch_operand();
 	int 	read_from_memory(int addr);
 	void	write_to_memory(int addr, int data);
 	void	print_registers();
-private: //The instruction set for the processor 	
+
+
+
+private: 	
+		void	save_registers(); //save registers to memory to handle interrupts
+		void	restore_registers();
+
+/*=================================================
+=            Processor Instruction Set            =
+=================================================*/
+/*IR number*/
 /*1*/	void	load_value (int val); //load value into AC
 /*2*/	void	load_addr (int addr); //load value at address into AC
 /*3*/	void	load_indr_addr(int addr); //load value from the adddress found in the address into AC
@@ -52,16 +58,20 @@ private: //The instruction set for the processor
 /*26*/	void	dec_x(); //decrement the value of x
 /*27*/	void	push(); //push AC onto Stack
 /*28*/	void	pop(); //pop from stack into AC
-/*29*/	void	mode(); //int set system mode, push SP and PC, set new SP and PC
-/*30*/	void	i_ret(); //restore registers, set user mode
+/*29*/	void	interrupt(int handler=0); //interrupt set system mode, push SP and PC, set new SP and PC
+/*30*/	void	interrupt_return(); //restore registers, set user mode
 /*50*/	void 	end(); //end execution
 
 
 
 private:
-	int AC, SP, IR, X, PC, Y; //registers used by processor
-	int writeFd, readFd; //file discriptors for writing/reading to memory process
-
+	int 	AC, SP, IR, X, PC, Y; //registers used by processor
+	int 	writeFd, readFd; //file discriptors for writing/reading to memory process
+	int 	instructionCount; //count of number instructions ran reset at intterrupt
+	int 	instructionsPerInterrupt; //number of instructions to run before interrupt occurs
+	bool	handlingInterrupt; //used to stop nexted interrupts from happening
+	bool	isSystemMode;
+	
 };
 
 #endif
