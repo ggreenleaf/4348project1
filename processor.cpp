@@ -34,7 +34,15 @@ Processor::Processor(int wfd, int rfd , int count):
 **/
 void Processor::fetch()
 {	
-	IR = read_from_memory(PC++); 
+	//before fetching instruction check for timer interrupt 
+	//save PC before fetching instruction will allow continuing where left off. 
+	if (instructionCount && instructionCount % instructionsPerInterrupt == 0 && 
+		instructionsPerInterrupt != -1 && !handlingInterrupt) {
+			interrupt(TIMER_INTERRUPT);			
+	}
+	else {
+		IR = read_from_memory(PC++); 
+	}
 }
 
 int Processor::get_ir()
@@ -98,12 +106,6 @@ void Processor::print_registers()
 void Processor::run()
 {
 	int op; //if instruction needs operand store here. 
-	bool interruptHandler = PROGRAM_INTERRUPT;
-	if (instructionCount && instructionCount % instructionsPerInterrupt == 0 && instructionsPerInterrupt != -1) {
-		std::cout << "handle interrupt!!!\n";
-		interruptHandler = TIMER_INTERRUPT;
-		IR = 29; //cause interrupt instruction
-	}
 
 	switch(IR)
 	{
@@ -202,7 +204,7 @@ void Processor::run()
 		case 28:	pop();
 					break;
 		
-		case 29:	interrupt(interruptHandler);
+		case 29:	interrupt(PROGRAM_INTERRUPT);
 					break;
 		
 		case 30:	interrupt_return();
@@ -214,8 +216,8 @@ void Processor::run()
 		default:	
 					std::cout << "invalid instruction: " << IR << "\n";
 	}
-
-	instructionCount++;
+	if (!handlingInterrupt)
+		instructionCount++;
 
 	
 }
@@ -413,12 +415,12 @@ void Processor::interrupt(int handler)
 								std::cout << "no valid interrupt handler\n";
 								break;
 	}
+	fetch();
 }
 
 void Processor::interrupt_return()
 {
 	restore_registers();
-	std::cout << "PC after restore: " << PC << "\n";
 	isSystemMode = false;
 	handlingInterrupt = false;
 }
@@ -446,7 +448,7 @@ void Processor::save_registers()
 void Processor::restore_registers()
 {
 	int sig = 3;
-	write(writeFd,&sig, sizeof(sig)); // on restore print memory
+	// write(writeFd,&sig, sizeof(sig)); // on restore print memory
 	int tempSP = SYSTEM_STACK;
 	SP = read_from_memory(--tempSP); //SP saved at [1999] before interrupt 
 	PC = read_from_memory(--tempSP); //PC saved at [1998] before interrupt
