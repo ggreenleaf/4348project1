@@ -5,12 +5,21 @@
 #define PROGRAM_INTERRUPT 1
 
 
+#define INTERRUPT_HANDLER 1500 //location of program interrupt handler 
+#define TIMER_HANDLER 1000 //location of timer interrupt handler
+#define SYSTEM_MEMORY 1000 //can't read from this address or greater unless in system mode
+#define SYSTEM_STACK 2000 //System stack pointer after saving PC, SP
+#define TIMER_INTERRUPT 0
+#define PROGRAM_INTERRUPT 1
+
+
+
 class Processor
 {
 public:
-	Processor();
+	// Processor();
 	Processor(int, int, int);
-	~Processor();
+	// ~Processor();
 
 	void 	fetch (); 
 	void 	run();
@@ -24,7 +33,7 @@ public:
 
 private: 	
 		void	save_registers(); //save registers to memory to handle interrupts
-		void	restore_registers();
+		void	restore_registers(); //restore registers from interrupt
 
 /*=================================================
 =            Processor Instruction Set            =
@@ -67,10 +76,10 @@ private:
 private:
 	int 	AC, SP, IR, X, PC, Y; //registers used by processor
 	int 	writeFd, readFd; //file discriptors for writing/reading to memory process
-	int 	instructionCount; //count of number instructions ran reset at intterrupt
-	int 	instructionsPerInterrupt; //number of instructions to run before interrupt occurs
-	bool	handlingInterrupt; //used to stop nexted interrupts from happening
-	bool	isSystemMode;
+	int 	instructionCount; //total num of instructions ran
+	int 	instructionsPerInterrupt; //number of instructions to run before timer interrupt occurs
+	bool	handlingInterrupt; //used to stop nested interrupts from occuring
+	bool	isSystemMode; //check for reading/writing to system memory
 	
 };
 

@@ -46,7 +46,7 @@ Memory::Memory(std::string filename, int wfd, int rfd): writeFd(wfd), readFd(rfd
 	file.close();
 }
 
-Memory::~Memory() {}
+// Memory::~Memory() {}
 
 
 void Memory::print()
@@ -59,14 +59,14 @@ void Memory::print()
 	}
 }
 
-void Memory::_read()
+void Memory::read_from_mem()
 {
 	int addr;
 	int data;
 	//read address from cpu process
 	read(readFd,&addr, sizeof(addr));
 	
-	data = _read(addr); //get data at addr
+	data = read_from_mem(addr); //get data at addr
 	//write data back to cpu process
 	write(writeFd,&data,sizeof(addr));
 }
@@ -75,7 +75,7 @@ void Memory::_read()
 *@param return the data at this address
 *@return the data at 
 **/
-int Memory::_read(int addr)
+int Memory::read_from_mem(int addr)
 {
 	return memory[addr];
 }
@@ -85,15 +85,15 @@ int Memory::_read(int addr)
 * @param address to write to
 * @param data that is to be written
 **/
-void Memory::_write(int addr, int data)
+void Memory::write_to_mem(int addr, int data)
 {
 	memory[addr] = data;
 }
 /**
-* public _write will handle communication between processes
-* and then call _write with the addr and data to save to memory
+* public write_to_mem will handle communication between processes
+* and then call write_to_mem with the addr and data to save to memory
 **/
-void Memory::_write()
+void Memory::write_to_mem()
 {
 	int addr, data;
 	//read address form cpu process
@@ -101,7 +101,7 @@ void Memory::_write()
 	//read data to write to addr
 	read(readFd, &data, sizeof(data));
 	
-	_write(addr,data);
+	write_to_mem(addr, data);
 }
 
 

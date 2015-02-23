@@ -3,28 +3,30 @@
 
 #include <string>
 #include <array>
+
+
 #define MEMSIZE 2000
 
 class Memory
 {
 
 public:
-			Memory();
-			~Memory();
+			// Memory();
+			// ~Memory();
 			Memory(std::string, int, int);
 	void	print(); //print the contents of the memory
-	//underscores for easier dif from read/write unix functions
-	void	_read(); 
-	void	_write();
+	
+	void	read_from_mem(); 
+	void	write_to_mem();
 
 private:
-	int 	_read(int); //retrun val at address in memory
-	void	_write(int, int);
+	int 	read_from_mem(int); //retrun val at address in memory
+	void	write_to_mem(int, int);
 
 private:
 	std::array<int,MEMSIZE> memory;
 	
-	int writeFd, readFd; //file discriptors for read/writing to processor 
+	int writeFd, readFd; //file discriptors for read/writing to processor process
 
 };
 

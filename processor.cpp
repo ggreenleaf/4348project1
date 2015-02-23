@@ -4,15 +4,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define INTERRUPT_HANDLER 1500 //location of program interrupt handler 
-#define TIMER_HANDLER 1000 //location of timer interrupt handler
-#define SYSTEM_MEMORY 1000 //can't read from this address or greater unless in system mode
-#define SYSTEM_STACK 2000 //System stack pointer after saving PC, SP
-#define INTERRUPT_INST 29 //instruction code for interrupt
-#define TIMER_INTERRUPT 0
-#define PROGRAM_INTERRUPT 1
 
-Processor::Processor() {}
+
+
+// Processor::Processor() {}
 /**
 *
 * constructor for Processor
@@ -22,7 +17,7 @@ Processor::Processor() {}
 * @param size of the system memory start of system stack
 * @param number of instructions to run before interrupt is exec. 
 **/
-Processor::~Processor() {};
+// Processor::~Processor() {};
 Processor::Processor(int wfd, int rfd , int count):
 	AC(0), PC(0), IR(0), X(0),Y(0), SP(SYSTEM_MEMORY),
 	writeFd(wfd), readFd(rfd),
@@ -35,7 +30,6 @@ Processor::Processor(int wfd, int rfd , int count):
 void Processor::fetch()
 {	
 	//before fetching instruction check for timer interrupt 
-	//save PC before fetching instruction will allow continuing where left off. 
 	if (instructionCount && instructionCount % instructionsPerInterrupt == 0 && 
 		instructionsPerInterrupt != -1 && !handlingInterrupt) {
 			interrupt(TIMER_INTERRUPT);			
@@ -91,9 +85,7 @@ void Processor::write_to_memory(int addr, int data)
 
 int Processor::fetch_operand()
 {
-	int op;
-	op = read_from_memory(PC++);
-	return op;
+	return read_from_memory(PC++);
 }
 
 //debugging purposes
@@ -391,12 +383,11 @@ void Processor::pop()
 	AC = read_from_memory(SP++);
 }
 /**
-*
-* interrupt handler will handle saving registers and moving PC
-* to correct hanlder based on interruptHandler
-*
+* interrupt will simulate a processor interrupt 
+* there are 2 types of interrupts a Timer interrupt based on number instructions executed 
+* and a program interrupt that is based in through the user program
+* @param handler will tell which interrupt is occuring and set the PC accordingly
 **/
-
 void Processor::interrupt(int handler)
 {
 	isSystemMode = true; 
@@ -415,7 +406,7 @@ void Processor::interrupt(int handler)
 								std::cout << "no valid interrupt handler\n";
 								break;
 	}
-	fetch();
+	fetch(); //need to fetch instruction on new PC before running. 
 }
 
 void Processor::interrupt_return()

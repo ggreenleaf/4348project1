@@ -63,10 +63,10 @@ int main(int argc, char *argv[])
 			switch (sig)
 			{
 				case 0:	
-						mem._read();
+						mem.read_from_mem();
 						break;
 				case 1:
-						mem._write();
+						mem.write_to_mem();
 						break;
 				case 2:
 						keep_reading = false;
