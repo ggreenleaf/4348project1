@@ -22,8 +22,7 @@ public:
 	// ~Processor();
 
 	void 	fetch (); 
-	void 	run();
-	int 	get_ir();
+	bool	run();
 	int 	fetch_operand();
 	int 	read_from_memory(int addr);
 	void	write_to_memory(int addr, int data);
@@ -67,7 +66,7 @@ private:
 /*26*/	void	dec_x(); //decrement the value of x
 /*27*/	void	push(); //push AC onto Stack
 /*28*/	void	pop(); //pop from stack into AC
-/*29*/	void	interrupt(int handler=0); //interrupt set system mode, push SP and PC, set new SP and PC
+/*29*/	void	interrupt(int); //interrupt set system mode, push SP and PC, set new SP and PC
 /*30*/	void	interrupt_return(); //restore registers, set user mode
 /*50*/	void 	end(); //end execution
 

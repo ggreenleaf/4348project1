@@ -81,19 +81,9 @@ int main(int argc, char *argv[])
 	else { //parent process will represent cpu
 		close(cpuToMem[READ]);
 		close(memToCpu[WRITE]);
-		while(true) {
-			
+		do {			
 			cpu.fetch();
-			// std::cout << "before exec: \n";
-			// cpu.print_registers();
-			cpu.run();
-			// std::cout << "after exec: \n";
-			// cpu.print_registers();
-			
-			if (cpu.get_ir() == 50) {
-				break;
-			}
-		}
+		}while(cpu.run()); //run returns true/false if end Instruction ran
 	wait(NULL); //waits for child process to complete
 	}
 

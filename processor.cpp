@@ -37,12 +37,9 @@ void Processor::fetch()
 	else {
 		IR = read_from_memory(PC++); 
 	}
+
 }
 
-int Processor::get_ir()
-{
-	return IR;
-}
 
 /**
 * read_from_memory data over pipe to request data at memory address addr
@@ -95,9 +92,10 @@ void Processor::print_registers()
 }
 
 
-void Processor::run()
+bool Processor::run()
 {
 	int op; //if instruction needs operand store here. 
+	bool cont_running = true; //if end command reach need to break out of while loop in main
 
 	switch(IR)
 	{
@@ -196,22 +194,24 @@ void Processor::run()
 		case 28:	pop();
 					break;
 		
-		case 29:	interrupt(PROGRAM_INTERRUPT);
+		case 29:	interrupt(PROGRAM_INTERRUPT); 
 					break;
 		
 		case 30:	interrupt_return();
 					break;
 
 		case 50:	end();
+					cont_running = false;
 					break;
 
 		default:	
 					std::cout << "invalid instruction: " << IR << "\n";
 	}
+	
 	if (!handlingInterrupt)
 		instructionCount++;
 
-	
+	return cont_running;
 }
 
 /*=================================================
