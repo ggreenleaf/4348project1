@@ -14,7 +14,7 @@ public:
 			// Memory();
 			// ~Memory();
 			Memory(std::string, int, int);
-	void	print(); //print the contents of the memory
+	// void	print(); //print the contents of the memory
 	
 	void	read_from_mem(); 
 	void	write_to_mem();

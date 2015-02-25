@@ -49,15 +49,13 @@ Memory::Memory(std::string filename, int wfd, int rfd): writeFd(wfd), readFd(rfd
 // Memory::~Memory() {}
 
 
-void Memory::print()
-{
-	int i = 0;
-	//cant use foreach loop 
-	//c++11 unvailable in linux machine
-	for (int data : memory) {
-		std::cout << "address: "<< i++ << " data: " << data << std::endl;
-	}
-}
+// void Memory::print()
+// {
+// 	int i = 0;
+// 	for (int data : memory) {
+// 		std::cout << "address: "<< i++ << " data: " << data << std::endl;
+// 	}
+// }
 
 void Memory::read_from_mem()
 {
