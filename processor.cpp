@@ -1,10 +1,10 @@
 #include "processor.hpp"
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <iostream>
-#include <stdio.h>
-#include <unistd.h>
+// #include <stdio.h>
+#include <unistd.h> 
 
-
+#define BACKSLASH 92
 
 
 // Processor::Processor() {}
@@ -268,7 +268,12 @@ void Processor::get()
 void Processor::put_port(int mode)
 {
 	 if (mode - 1)
-	 	std::cout << (char)AC;
+	 {
+	 	if (AC == BACKSLASH)
+	 		std::cout << "\\"; //handle backslash special case for myprogram.txt
+	 	else
+	 		std::cout << (char)AC;
+	 }
 	 else
 		std::cout << AC;
 }

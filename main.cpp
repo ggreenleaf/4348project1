@@ -1,14 +1,11 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h> //c style string library
-#include <string> 
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <iostream>
+#include <unistd.h> //pipes
+#include <string> //std::string
+#include <sys/wait.h> //wait
+#include <iostream> //printing 
 #include "memory.hpp"
 #include "processor.hpp"
-#include <time.h>
-#include <signal.h>
+#include <time.h> //for random seed
+
 
 
 
