@@ -14,11 +14,11 @@
 #define WRITE 1
 
 //print cpu registers use for debugging code. 
-void print_registers(Processor& cpu)
-{
-	cpu.print_registers();
+// void print_registers(Processor& cpu)
+// {
+// 	cpu.print_registers();
 
-}
+// }
 
 int main(int argc, char *argv[]) 
 {
@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
 						keep_reading = false;
 						break;
 				default:
-						mem.print();
 						break;
 			}
 			
