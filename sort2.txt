@@ -1,0 +1,99 @@
+23 //get numbers
+200
+23 //print numbers
+300 
+50
+
+
+
+.200 //get 10 items save into memory starting at 950
+8
+7
+950
+8
+7
+951
+8
+7
+952
+8
+7
+953
+8
+7
+954
+8
+7
+955
+8
+7
+956
+8
+7
+957
+8
+7
+958
+8
+7
+959
+24 //return
+
+.300 //prints the 10 numbers
+1 //set i = 10 
+10 
+7 //save i in 901
+901
+1 // set j = 0
+0
+7 //save j in 902
+902 
+
+2   //start of loop //260
+901 // load i from 901
+14  //move i to X
+2
+902 //load j from 902
+16 //copy j to Y
+5  //load from 950 + y
+950 //num array indx 0 starts at 950 
+9  //print the number
+1
+23 //call spaces
+405
+26 //dec i then save to memory then inc j
+15 //moves i to AC
+7 //save i in 901
+901
+17 //cpy j to AC
+14 //move j to X
+25 //inc j 
+15 //move j back to AC
+7 //save j into memory(902)
+902
+2    //load i 
+901  
+21 //if i is 0 jump 
+280 //jump address 280 will return from function
+20 //reloop untill X == 0
+308
+
+.280 
+23 //call newline then return 
+400
+24 
+
+.400 //print new line
+1
+10
+9
+2
+24
+
+.405 //print space
+1
+32
+9
+2
+24
+
