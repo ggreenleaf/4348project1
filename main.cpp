@@ -7,9 +7,6 @@
 #include <time.h> //for random seed
 
 
-
-
-
 #define READ 0
 #define WRITE 1
 

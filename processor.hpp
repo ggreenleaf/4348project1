@@ -53,8 +53,8 @@ private:
 /*13*/ 	void	sub_y(); //sub the value of y from AC
 /*14*/	void	cpy_to_x();  //copy value in the AC to X
 /*15*/	void	cpy_from_x(); //copy value in X to AC
-/*16*/	void	cpy_to_y(); //copy value Y to the AC
-/*17*/	void	cpy_from_y(); //copy value from AC to Y
+/*16*/	void	cpy_to_y(); //copy value AC to the Y
+/*17*/	void	cpy_from_y(); //copy value from Y to AC
 /*18*/	void	cpy_to_sp(); //copy value from AC to SP
 /*19*/	void	cpy_from_sp(); //copy value from SP to AC
 /*20*/	void	jump_addr(int addr); //jump to address
