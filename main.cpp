@@ -24,7 +24,9 @@ int main(int argc, char *argv[])
 	int memToCpu [2]; //pipe for communication memory -> cpu
 
 	pid_t pid;
-	std::string filename = argv[1]; //program file name
+	
+	std::string filename(argv[1]); //program file name
+	
 	if (argc == 3)	{
 		interruptCount = atoi(argv[2]);
 	}

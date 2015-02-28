@@ -40,7 +40,6 @@ void Processor::fetch()
 
 }
 
-
 /**
 * read_from_memory data over pipe to request data at memory address addr
 * @param address to read from memory
@@ -326,7 +325,6 @@ void Processor::cpy_from_sp()
 	AC = SP;
 }
 /**
-*
 * will jump to an address
 * @param address to jump to
 **/
@@ -361,9 +359,7 @@ void Processor::call_addr(int addr)
 }
 void Processor::ret()
 {
-	int addr;
-	addr = read_from_memory(SP++);
-	jump_addr(addr);
+	jump_addr(read_from_memory(SP++));
 }
 /**
 * Increment X by 1
